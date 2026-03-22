@@ -146,9 +146,118 @@ export function activate(context: vscode.ExtensionContext) {
       }
     }),
 
-    vscode.commands.registerCommand("envtree.refresh", () => {
-      provider.refresh();
-    })
+    vscode.commands.registerCommand("envtree.deleteSecret", async () => {
+      try {
+        const key = await vscode.window.showInputBox({
+          prompt: "Welke secret wil je verwijderen?",
+          placeHolder: "API_KEY"
+        });
+        
+        if (!key) return;
+
+        const confirm = await vscode.window.showWarningMessage(
+          `Weet je zeker dat je '${key}' wilt verwijderen?`,
+          { modal: true },
+          "Verwijderen",
+          "Annuleren"
+        );
+        
+        if (confirm !== "Verwijderen") return;
+
+        const deleted = await client.deleteSecret(key);
+        if (deleted) {
+          vscode.window.showInformationMessage(`🗑️ Secret '${key}' verwijderd`);
+          provider.refresh();
+        } else {
+          vscode.window.showErrorMessage(`❌ Secret '${key}' niet gevonden`);
+        }
+      } catch (error) {
+        vscode.window.showErrorMessage(`❌ Fout bij verwijderen: ${error}`);
+      }
+    }),
+
+    vscode.commands.registerCommand("envtree.settings", async () => {
+      const config = vscode.workspace.getConfiguration('envtree');
+      
+      const action = await vscode.window.showQuickPick([
+        { label: "⚙️ Daemon Instellingen", description: "Poort en host configuratie" },
+        { label: "🔄 Tree Instellingen", description: "Auto-refresh en display opties" },
+        { label: "🔐 Security Instellingen", description: "Secret display en timeouts" },
+        { label: "📊 Status Info", description: "Daemon verbinding en project info" }
+      ], {
+        placeHolder: "Kies een instelling"
+      });
+
+      if (!action) return;
+
+      switch (action.label) {
+        case "⚙️ Daemon Instellingen":
+          const port = await vscode.window.showInputBox({
+            prompt: "Daemon poort",
+            value: config.get('daemonPort', 4848).toString(),
+            validateInput: (value) => {
+              const num = parseInt(value);
+              return isNaN(num) || num < 1024 || num > 65535 
+                ? "Ongeldige poort (1024-65535)" 
+                : null;
+            }
+          });
+          
+          if (port !== undefined) {
+            config.update('daemonPort', parseInt(port));
+            vscode.window.showInformationMessage(`✅ Daemon poort ingesteld op ${port}`);
+          }
+          break;
+
+        case "🔄 Tree Instellingen":
+          const autoRefresh = await vscode.window.showQuickPick([
+            { label: "Auto-refresh: Aan", value: true },
+            { label: "Auto-refresh: Uit", value: false }
+          ], {
+            placeHolder: `Auto-refresh: ${config.get('autoRefresh', true) ? 'Aan' : 'Uit'}`
+          });
+
+          if (autoRefresh) {
+            config.update('autoRefresh', autoRefresh.value);
+            vscode.window.showInformationMessage(`✅ Auto-refresh ${autoRefresh.value ? 'aangezet' : 'uitgezet'}`);
+          }
+          break;
+
+        case "🔐 Security Instellingen":
+          const showSecrets = await vscode.window.showQuickPick([
+            { label: "Toon secret waarden: Aan", value: true },
+            { label: "Toon secret waarden: Uit", value: false }
+          ], {
+            placeHolder: `Toon secret waarden: ${config.get('showSecretValues', false) ? 'Aan' : 'Uit'}`
+          });
+
+          if (showSecrets) {
+            config.update('showSecretValues', showSecrets.value);
+            vscode.window.showInformationMessage(`⚠️ Secret waarden display ${showSecrets.value ? 'aangezet' : 'uitgezet'} (niet aanbevolen)`);
+            provider.refresh();
+          }
+          break;
+
+        case "📊 Status Info":
+          const isHealthy = await client.healthCheck();
+          const workspaceFolders = vscode.workspace.workspaceFolders;
+          const workspaceCount = workspaceFolders?.length || 0;
+          
+          const info = [
+            `🌳 EnvTree Status`,
+            ``,
+            `Daemon Status: ${isHealthy ? '✅ Verbonden' : '❌ Niet verbonden'}`,
+            `Workspace: ${workspaceCount} map(en) gevonden`,
+            `Poort: ${config.get('daemonPort', 4848)}`,
+            `Host: ${config.get('daemonHost', 'localhost')}`,
+            ``,
+            `Configuratie: VSCode Settings > EnvTree`
+          ];
+
+          vscode.window.showInformationMessage(info.join('\n'), { modal: true });
+          break;
+      }
+    }),
   ];
 
   // Voeg alles toe aan context subscriptions

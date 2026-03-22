@@ -15,10 +15,6 @@
     "Snippets"
   ],
   "activationEvents": [
-    "onCommand:envtree.init",
-    "onCommand:envtree.addSecret",
-    "onCommand:envtree.inject",
-    "onCommand:envtree.rotate",
     "workspaceContains:**/.git"
   ],
   "main": "./dist/extension.js",
@@ -27,27 +23,44 @@
       {
         "command": "envtree.init",
         "title": "EnvTree: Initialize Project",
-        "icon": "$(add)"
+        "icon": "$(add)",
+        "category": "EnvTree"
       },
       {
         "command": "envtree.addSecret",
         "title": "EnvTree: Add Secret",
-        "icon": "$(key)"
+        "icon": "$(key)",
+        "category": "EnvTree"
       },
       {
         "command": "envtree.inject",
         "title": "EnvTree: Inject to .env",
-        "icon": "$(file-add)"
+        "icon": "$(file-add)",
+        "category": "EnvTree"
       },
       {
         "command": "envtree.rotate",
         "title": "EnvTree: Rotate Secret",
-        "icon": "$(refresh)"
+        "icon": "$(refresh)",
+        "category": "EnvTree"
       },
       {
         "command": "envtree.refresh",
         "title": "EnvTree: Refresh",
-        "icon": "$(refresh)"
+        "icon": "$(refresh)",
+        "category": "EnvTree"
+      },
+      {
+        "command": "envtree.deleteSecret",
+        "title": "EnvTree: Delete Secret",
+        "icon": "$(trash)",
+        "category": "EnvTree"
+      },
+      {
+        "command": "envtree.settings",
+        "title": "EnvTree: Settings",
+        "icon": "$(gear)",
+        "category": "EnvTree"
       }
     ],
     "views": {
@@ -55,7 +68,9 @@
         {
           "id": "envtreeExplorer",
           "name": "EnvTree",
-          "when": "workspaceContains:**/.git"
+          "when": "workspaceContains:**/.git",
+          "icon": "$(lock)",
+          "contextualTitle": "EnvTree Secrets"
         }
       ]
     },
@@ -64,32 +79,126 @@
         {
           "command": "envtree.init",
           "when": "view == envtreeExplorer",
-          "group": "navigation"
+          "group": "navigation@1"
         },
         {
           "command": "envtree.refresh",
           "when": "view == envtreeExplorer",
-          "group": "navigation"
+          "group": "navigation@2"
+        },
+        {
+          "command": "envtree.settings",
+          "when": "view == envtreeExplorer",
+          "group": "navigation@3"
         }
       ],
       "view/item/context": [
         {
           "command": "envtree.addSecret",
           "when": "view == envtreeExplorer && viewItem == project",
-          "group": "inline"
+          "group": "inline@1"
         },
         {
           "command": "envtree.inject",
           "when": "view == envtreeExplorer && viewItem == secret",
-          "group": "inline"
+          "group": "inline@1"
         },
         {
           "command": "envtree.rotate",
           "when": "view == envtreeExplorer && viewItem == secret",
-          "group": "inline"
+          "group": "inline@2"
+        },
+        {
+          "command": "envtree.deleteSecret",
+          "when": "view == envtreeExplorer && viewItem == secret",
+          "group": "inline@3"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "envtree.init",
+          "when": "workspaceContains:**/.git"
+        },
+        {
+          "command": "envtree.addSecret",
+          "when": "workspaceContains:**/.git"
+        },
+        {
+          "command": "envtree.inject",
+          "when": "workspaceContains:**/.git"
+        },
+        {
+          "command": "envtree.rotate",
+          "when": "workspaceContains:**/.git"
+        },
+        {
+          "command": "envtree.deleteSecret",
+          "when": "workspaceContains:**/.git"
+        },
+        {
+          "command": "envtree.refresh",
+          "when": "workspaceContains:**/.git"
+        },
+        {
+          "command": "envtree.settings",
+          "when": "workspaceContains:**/.git"
         }
       ]
-    }
+    },
+    "configuration": {
+      "title": "EnvTree",
+      "properties": {
+        "envtree.daemonPort": {
+          "type": "number",
+          "default": 4848,
+          "description": "Poort voor de EnvTree daemon",
+          "minimum": 1024,
+          "maximum": 65535
+        },
+        "envtree.daemonHost": {
+          "type": "string",
+          "default": "localhost",
+          "description": "Host voor de EnvTree daemon"
+        },
+        "envtree.autoRefresh": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatisch de EnvTree tree verversen"
+        },
+        "envtree.showSecretValues": {
+          "type": "boolean",
+          "default": false,
+          "description": "Toon secret waarden in de tree (niet aanbevolen)"
+        },
+        "envtree.notificationTimeout": {
+          "type": "number",
+          "default": 5000,
+          "description": "Timeout voor API calls in milliseconden",
+          "minimum": 1000,
+          "maximum": 30000
+        }
+      }
+    },
+    "keybindings": [
+      {
+        "command": "envtree.refresh",
+        "key": "ctrl+shift+r",
+        "mac": "cmd+shift+r",
+        "when": "view == envtreeExplorer"
+      },
+      {
+        "command": "envtree.addSecret",
+        "key": "ctrl+shift+a",
+        "mac": "cmd+shift+a", 
+        "when": "view == envtreeExplorer"
+      },
+      {
+        "command": "envtree.inject",
+        "key": "ctrl+shift+i",
+        "mac": "cmd+shift+i",
+        "when": "workspaceContains:**/.git"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
