@@ -13,7 +13,7 @@ export function activate(context: vscode.ExtensionContext) {
   const client = new EnvTreeClient("http://localhost:4848");
 
   // Test daemon connection
-  client.healthCheck().then(isHealthy => {
+  client.healthCheck().then((isHealthy: boolean) => {
     if (isHealthy) {
       console.log("✅ EnvTree daemon verbinding succesvol");
       vscode.window.showInformationMessage("🌳 EnvTree: Daemon verbinding actief");
@@ -21,7 +21,7 @@ export function activate(context: vscode.ExtensionContext) {
       console.log("❌ EnvTree daemon niet bereikbaar");
       vscode.window.showWarningMessage("⚠️ EnvTree: Daemon niet gevonden. Start de daemon met 'npm run start' in de daemon folder");
     }
-  }).catch(error => {
+  }).catch((error: any) => {
     console.log("❌ EnvTree daemon connectie fout:", error);
     vscode.window.showErrorMessage(`❌ EnvTree: Connectie fout - ${error.message}`);
   });

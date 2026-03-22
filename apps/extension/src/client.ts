@@ -175,6 +175,18 @@ export class EnvTreeClient {
   }
 
   /**
+   * Controleer of daemon beschikbaar is
+   */
+  async healthCheck(): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.baseUrl}/health`);
+      return response.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
    * Haal huidige project pad op
    */
   private async getCurrentProjectPath(): Promise<string> {
@@ -186,17 +198,5 @@ export class EnvTreeClient {
     }
 
     return workspaceFolders[0].uri.fsPath;
-  }
-
-  /**
-   * Controleer of daemon beschikbaar is
-   */
-  async healthCheck(): Promise<boolean> {
-    try {
-      const response = await fetch(`${this.baseUrl}/health`);
-      return response.ok;
-    } catch {
-      return false;
-    }
   }
 }
