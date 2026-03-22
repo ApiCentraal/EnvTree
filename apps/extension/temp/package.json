@@ -2,10 +2,6 @@
   "name": "envtree-extension",
   "displayName": "EnvTree",
   "description": "Developer-first secret management for your projects",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/apicentraal/envtree.git"
-  },
   "version": "1.0.1",
   "engines": {
     "vscode": "^1.85.0"
@@ -90,11 +86,6 @@
         }
       ]
     }
-  },
-  "scripts": {
-    "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./"
   },
   "dependencies": {
     "node-fetch": "^2.7.0"

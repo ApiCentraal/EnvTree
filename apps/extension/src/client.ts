@@ -1,6 +1,7 @@
-/**
- * HTTP client voor communicatie met EnvTree daemon
- */
+import * as vscode from "vscode";
+
+// Node.js fetch polyfill voor VSCode extensie context
+const fetch = require('node-fetch');
 
 export interface Secret {
   id: string;
@@ -189,23 +190,13 @@ export class EnvTreeClient {
    * Haal huidige project pad op
    */
   private async getCurrentProjectPath(): Promise<string> {
-    // Voor nu gebruiken we het eerste workspace folder
-    // In de toekomst kunnen we dit uitbreiden met project selectie
-    const workspaceFolders = await this.getWorkspaceFolders();
+    // Gebruik VSCode API voor workspace detection
+    const workspaceFolders = vscode.workspace.workspaceFolders;
     
     if (!workspaceFolders || workspaceFolders.length === 0) {
       throw new Error("Geen workspace folder gevonden");
     }
 
-    return workspaceFolders[0].fsPath;
-  }
-
-  /**
-   * Helper om workspace folders op te halen
-   */
-  private getWorkspaceFolders(): any[] {
-    // Simulatie van vscode.workspace.workspaceFolders
-    // In echte implementatie zou dit vscode API gebruiken
-    return [];
+    return workspaceFolders[0].uri.fsPath;
   }
 }
