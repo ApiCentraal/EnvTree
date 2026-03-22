@@ -99,6 +99,19 @@ export class EnvTreeProvider implements vscode.TreeDataProvider<EnvTreeItem> {
   }
 
   /**
+   * Haal huidige project pad op
+   */
+  private getCurrentProjectPath(): string | undefined {
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    
+    if (!workspaceFolders || workspaceFolders.length === 0) {
+      return undefined;
+    }
+
+    return workspaceFolders[0].uri.fsPath;
+  }
+
+  /**
    * Laad projecten van de daemon
    */
   private async loadProjects(): Promise<void> {
@@ -121,16 +134,5 @@ export class EnvTreeProvider implements vscode.TreeDataProvider<EnvTreeItem> {
       console.warn(`Kan secrets niet laden voor project ${projectPath}:`, error);
       this.secrets = [];
     }
-  }
-
-  /**
-   * Haal huidige project pad op
-   */
-  private getCurrentProjectPath(): string | undefined {
-    const workspaceFolders = vscode.workspace.workspaceFolders;
-    if (!workspaceFolders || workspaceFolders.length === 0) {
-      return undefined;
-    }
-    return workspaceFolders[0].uri.fsPath;
   }
 }

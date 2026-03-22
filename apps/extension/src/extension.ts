@@ -37,28 +37,50 @@ export function activate(context: vscode.ExtensionContext) {
 
   // Registreer commands
   const commands = [
-    vscode.commands.registerCommand("envtree.init", () => {
-      vscode.window.showInformationMessage("🚀 EnvTree project initialiseren...");
+    vscode.commands.registerCommand("envtree.init", async () => {
+      try {
+        // Haal workspace pad op
+        const workspaceFolders = vscode.workspace.workspaceFolders;
+        if (!workspaceFolders || workspaceFolders.length === 0) {
+          vscode.window.showErrorMessage("❌ Geen workspace folder gevonden");
+          return;
+        }
+
+        const projectPath = workspaceFolders[0].uri.fsPath;
+        const projectName = await vscode.window.showInputBox({
+          prompt: "Voer project naam in",
+          placeHolder: "Mijn Project"
+        });
+
+        if (!projectName) return;
+
+        // Initialiseer project
+        const project = await client.initProject(projectName);
+        vscode.window.showInformationMessage(`✅ Project "${projectName}" succesvol geïnitialiseerd`);
+        provider.refresh();
+      } catch (error) {
+        vscode.window.showErrorMessage(`❌ Fout bij initialiseren project: ${error}`);
+      }
     }),
 
     vscode.commands.registerCommand("envtree.addSecret", async () => {
-      const key = await vscode.window.showInputBox({
-        prompt: "Voer secret key naam in",
-        placeHolder: "DATABASE_URL"
-      });
-      
-      if (!key) return;
-
-      const value = await vscode.window.showInputBox({
-        prompt: "Voer secret waarde in",
-        password: true,
-        placeHolder: "postgresql://..."
-      });
-      
-      if (!value) return;
-
       try {
-        await client.addSecret(key, value);
+        const key = await vscode.window.showInputBox({
+          prompt: "Voer secret key naam in",
+          placeHolder: "DATABASE_URL"
+        });
+        
+        if (!key) return;
+
+        const value = await vscode.window.showInputBox({
+          prompt: "Voer secret waarde in",
+          password: true,
+          placeHolder: "postgresql://..."
+        });
+        
+        if (!value) return;
+
+        const secret = await client.addSecret(key, value);
         vscode.window.showInformationMessage(`✅ Secret '${key}' toegevoegd`);
         provider.refresh();
       } catch (error) {
@@ -71,8 +93,8 @@ export function activate(context: vscode.ExtensionContext) {
         const content = await client.injectSecrets();
         const workspaceFolders = vscode.workspace.workspaceFolders;
         
-        if (!workspaceFolders) {
-          vscode.window.showErrorMessage("❌ Geen workspace gevonden");
+        if (!workspaceFolders || workspaceFolders.length === 0) {
+          vscode.window.showErrorMessage("❌ Geen workspace folder gevonden");
           return;
         }
 
@@ -85,21 +107,38 @@ export function activate(context: vscode.ExtensionContext) {
         );
 
         vscode.window.showInformationMessage("✅ Secrets geïnjecteerd in .env");
+        
+        // Vraag om .env bestand te openen
+        const openAction = "Open .env";
+        vscode.window.showInformationMessage("📄 .env bestand aangemaakt", openAction)
+          .then(action => {
+            if (action === openAction) {
+              vscode.commands.executeCommand('vscode.open', envPath);
+            }
+          });
       } catch (error) {
         vscode.window.showErrorMessage(`❌ Fout bij injecteren: ${error}`);
       }
     }),
 
     vscode.commands.registerCommand("envtree.rotate", async () => {
-      const key = await vscode.window.showInputBox({
-        prompt: "Welke secret wil je roteren?",
-        placeHolder: "API_KEY"
-      });
-      
-      if (!key) return;
-
       try {
-        await client.rotateSecret(key);
+        const key = await vscode.window.showInputBox({
+          prompt: "Welke secret wil je roteren?",
+          placeHolder: "API_KEY"
+        });
+        
+        if (!key) return;
+
+        const newValue = await vscode.window.showInputBox({
+          prompt: "Voer nieuwe waarde in",
+          password: true,
+          placeHolder: "nieuwe_secret_waarde"
+        });
+        
+        if (!newValue) return;
+
+        const rotated = await client.rotateSecret(key, newValue);
         vscode.window.showInformationMessage(`🔄 Secret '${key}' geroteerd`);
         provider.refresh();
       } catch (error) {
