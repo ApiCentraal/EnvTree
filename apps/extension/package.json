@@ -1,0 +1,100 @@
+{
+  "name": "envtree-extension",
+  "displayName": "EnvTree",
+  "description": "Developer-first secret management for your projects",
+  "version": "1.0.0",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "Snippets"
+  ],
+  "activationEvents": [
+    "onCommand:envtree.init",
+    "onCommand:envtree.addSecret",
+    "onCommand:envtree.inject",
+    "onCommand:envtree.rotate",
+    "workspaceContains:**/.git"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "envtree.init",
+        "title": "EnvTree: Initialize Project",
+        "icon": "$(add)"
+      },
+      {
+        "command": "envtree.addSecret",
+        "title": "EnvTree: Add Secret",
+        "icon": "$(key)"
+      },
+      {
+        "command": "envtree.inject",
+        "title": "EnvTree: Inject to .env",
+        "icon": "$(file-add)"
+      },
+      {
+        "command": "envtree.rotate",
+        "title": "EnvTree: Rotate Secret",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "envtree.refresh",
+        "title": "EnvTree: Refresh",
+        "icon": "$(refresh)"
+      }
+    ],
+    "views": {
+      "explorer": [
+        {
+          "id": "envtreeExplorer",
+          "name": "EnvTree",
+          "when": "workspaceContains:**/.git"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "envtree.init",
+          "when": "view == envtreeExplorer",
+          "group": "navigation"
+        },
+        {
+          "command": "envtree.refresh",
+          "when": "view == envtreeExplorer",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "envtree.addSecret",
+          "when": "view == envtreeExplorer && viewItem == project",
+          "group": "inline"
+        },
+        {
+          "command": "envtree.inject",
+          "when": "view == envtreeExplorer && viewItem == secret",
+          "group": "inline"
+        },
+        {
+          "command": "envtree.rotate",
+          "when": "view == envtreeExplorer && viewItem == secret",
+          "group": "inline"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}

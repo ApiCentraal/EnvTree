@@ -1,0 +1,34 @@
+{
+  "name": "envtree",
+  "version": "1.0.0",
+  "description": "Developer-first secret management tool",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm run build:packages && npm run build:apps",
+    "build:packages": "npm run build --workspaces --if-present",
+    "build:apps": "npm run build --workspaces --if-present",
+    "dev:daemon": "npm run dev --workspace=envtree-daemon",
+    "dev:extension": "npm run dev --workspace=envtree-extension",
+    "test": "npm test --workspaces --if-present"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "keywords": [
+    "secrets",
+    "environment",
+    "vault",
+    "vscode",
+    "security"
+  ],
+  "author": "EnvTree Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

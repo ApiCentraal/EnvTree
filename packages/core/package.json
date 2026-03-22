@@ -1,0 +1,19 @@
+{
+  "name": "@envtree/core",
+  "version": "1.0.0",
+  "description": "Core business logic for EnvTree",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@envtree/crypto": "^1.0.0",
+    "@envtree/storage": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
