@@ -12,6 +12,20 @@ export function activate(context: vscode.ExtensionContext) {
   // Maak EnvTree client voor API communicatie
   const client = new EnvTreeClient("http://localhost:4848");
 
+  // Test daemon connection
+  client.healthCheck().then(isHealthy => {
+    if (isHealthy) {
+      console.log("✅ EnvTree daemon verbinding succesvol");
+      vscode.window.showInformationMessage("🌳 EnvTree: Daemon verbinding actief");
+    } else {
+      console.log("❌ EnvTree daemon niet bereikbaar");
+      vscode.window.showWarningMessage("⚠️ EnvTree: Daemon niet gevonden. Start de daemon met 'npm run start' in de daemon folder");
+    }
+  }).catch(error => {
+    console.log("❌ EnvTree daemon connectie fout:", error);
+    vscode.window.showErrorMessage(`❌ EnvTree: Connectie fout - ${error.message}`);
+  });
+
   // Maak tree provider voor sidebar
   const provider = new EnvTreeProvider(client);
   
